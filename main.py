@@ -7,7 +7,8 @@ def create_window():
     win = w.MyWindow()
 
     win.show()
-
+    win.create_cells()
+    win.init_grid()
     sys.exit(app.exec_())
 
 create_window()
