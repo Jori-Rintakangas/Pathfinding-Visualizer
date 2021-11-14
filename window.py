@@ -5,9 +5,9 @@ from PyQt5.QtGui import QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsLineItem, QMainWindow, QGraphicsRectItem
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 from PyQt5.QtCore import Qt, QTime, QEventLoop, QCoreApplication
-
+from collections import deque
 import cell as c
-
+import random
 
 X_POS = 50
 Y_POS = 300
@@ -22,6 +22,7 @@ STEP = 20
 START = 100
 
 CELL_SIZE = 20
+ALL_CELLS = 1600
 
 class MyWindow(QMainWindow):
     def __init__(self):
@@ -30,6 +31,7 @@ class MyWindow(QMainWindow):
         self.edges = {}
         self.cells = {}
         self.speed = 20
+        self.white = QBrush(QtGui.QColor(255,255,255))
         self.init_ui()
 
     def init_ui(self):
@@ -130,6 +132,27 @@ class MyWindow(QMainWindow):
                 rect.moveBy(x,y)
                 new_cell = c.Cell(x, y, rect)
                 self.cells[x, y] = new_cell
+
+
+    def create_maze(self, x, y):
+        self.cells[x, y].visit_cell()
+        neighbours = self.cells[x, y].get_neighbours()
+        self.cells[x, y].get_rect().setBrush(self.white)
+        all_visited = False
+        while not all_visited:
+            neighbour = random.choice(list(neighbours.values()))
+
+            if not neighbour.is_visited():
+                neighbour.visit_cell()
+                self.create_maze(neighbour.x, neighbour.y)
+
+            if all(n.is_visited() for n in neighbours.values()):
+                all_visited = True
+
+
+
+
+
         
 
 

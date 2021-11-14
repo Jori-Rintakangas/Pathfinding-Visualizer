@@ -12,10 +12,13 @@ class Cell:
         self.rect = rect
         self.neighbours = {}
         self.visited = False
+        self.arrived_from = [0,0]
 
-
-    def visited(self):
+    def is_visited(self):
         return self.visited
+
+    def visit_cell(self):
+        self.visited = True
 
     def get_neighbours(self):
         return self.neighbours
@@ -25,3 +28,9 @@ class Cell:
 
     def get_rect(self):
         return self.rect
+
+    def get_location(self):
+        return [self.x, self.y]
+
+    def set_arrived_from(self, x, y):
+        self.arrived_from = [x, y]
