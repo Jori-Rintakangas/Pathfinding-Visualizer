@@ -30,8 +30,9 @@ class MyWindow(QMainWindow):
 
         self.edges = {}
         self.cells = {}
-        self.speed = 20
+        self.speed = 100
         self.white = QBrush(QtGui.QColor(255,255,255))
+        self.white_pen = QPen(QtGui.QColor(255,255,255))
         self.init_ui()
 
     def init_ui(self):
@@ -58,6 +59,7 @@ class MyWindow(QMainWindow):
         self.animation_speed.setInvertedAppearance(True)
         self.animation_speed.setRange(1, 400)
         self.animation_speed.setValue(40)
+        self.animation_speed.valueChanged.connect(self.change_speed)
 
         self.text_label = QtWidgets.QLabel(self)
         self.text_label.setText('Animation Speed')
@@ -67,15 +69,24 @@ class MyWindow(QMainWindow):
         self.new_maze_button.setGeometry(20, 250, 100, 30)
         self.new_maze_button.setText('New Maze')
 
+
+    def change_speed(self):
+        self.speed = self.animation_speed.value()
+
+    def delay(self):
+        die_time = QTime.currentTime().addMSecs(self.speed)
+        while QTime.currentTime() < die_time:
+            QCoreApplication.processEvents(QEventLoop.AllEvents, 100)
     
     def init_grid(self):
         pen = QPen(QtGui.QColor(0,0,0))
         pen.setWidth(2)
         edge1_id = 0
+        edge2_id = 0
         for y in range(0 ,VIEW_H, STEP):
             for x in range(0 ,VIEW_W, STEP):
                 edge1_id += 1
-
+                edge2_id -= 1
                 edge1 = self.scene.addLine(0, 0, STEP, 0, pen)
                 edge2 = self.scene.addLine(0, 0, 0, STEP, pen)
 
@@ -83,7 +94,6 @@ class MyWindow(QMainWindow):
                 edge2.moveBy(x, y)
 
                 self.edges[edge1_id] = edge1
-                edge2_id = edge1_id + 1
                 self.edges[edge2_id] = edge2
 
                 if y == 0 and x == 0:
@@ -113,14 +123,14 @@ class MyWindow(QMainWindow):
                     cell3.add_neighbour(cell1, edge1_id)
 
                 if x == VIEW_W - STEP:
-                    edge1_id += 1
-                    edge = self.scene.addLine(0, 0, 0, STEP, pen)
-                    edge.moveBy(x + STEP, y)
-                    self.edges[edge1_id] = edge1
+                    edge2_id -= 1
+                    edge2 = self.scene.addLine(0, 0, 0, STEP, pen)
+                    edge2.moveBy(x + STEP, y)
+                    self.edges[edge2_id] = edge2
                 if y == VIEW_H - STEP:
                     edge1_id += 1
-                    edge = self.scene.addLine(0, 0, STEP, 0, pen)
-                    edge.moveBy(x, y + STEP)
+                    edge1 = self.scene.addLine(0, 0, STEP, 0, pen)
+                    edge1.moveBy(x, y + STEP)
                     self.edges[edge1_id] = edge1
 
     def create_cells(self):
@@ -135,19 +145,23 @@ class MyWindow(QMainWindow):
 
 
     def create_maze(self, x, y):
+        self.delay()
         self.cells[x, y].visit_cell()
         neighbours = self.cells[x, y].get_neighbours()
         self.cells[x, y].get_rect().setBrush(self.white)
         all_visited = False
         while not all_visited:
-            neighbour = random.choice(list(neighbours.values()))
-
+            cell = random.choice(list(neighbours.items()))
+            edge = cell[0]
+            neighbour = cell[1]
             if not neighbour.is_visited():
                 neighbour.visit_cell()
+                self.edges[edge].setPen(self.white_pen)
                 self.create_maze(neighbour.x, neighbour.y)
 
             if all(n.is_visited() for n in neighbours.values()):
                 all_visited = True
+
 
 
 
