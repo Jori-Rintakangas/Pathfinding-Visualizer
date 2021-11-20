@@ -33,6 +33,7 @@ class MyWindow(QMainWindow):
         self.speed = 100
         self.white = QBrush(QtGui.QColor(255,255,255))
         self.white_pen = QPen(QtGui.QColor(255,255,255))
+        self.white_pen.setWidth(0)
         self.init_ui()
 
     def init_ui(self):
@@ -136,6 +137,7 @@ class MyWindow(QMainWindow):
     def create_cells(self):
         brush = QBrush(QtGui.QColor(0,0,255))
         pen = QPen(QtGui.QColor(0,0,0))
+        pen.setWidth(-1)
         for y in range(0 ,VIEW_H, STEP):
             for x in range(0 ,VIEW_W, STEP):
                 rect = self.scene.addRect(0,0, CELL_SIZE, CELL_SIZE, pen, brush)
@@ -143,30 +145,30 @@ class MyWindow(QMainWindow):
                 new_cell = c.Cell(x, y, rect)
                 self.cells[x, y] = new_cell
 
-
     def create_maze(self, x, y):
         self.delay()
         self.cells[x, y].visit_cell()
-        neighbours = self.cells[x, y].get_neighbours()
         self.cells[x, y].get_rect().setBrush(self.white)
+        neighbours = self.cells[x, y].get_neighbours()
+
         all_visited = False
         while not all_visited:
+            neighbours = self.cells[x, y].get_neighbours()
+            if not neighbours:
+                break
             cell = random.choice(list(neighbours.items()))
             edge = cell[0]
             neighbour = cell[1]
             if not neighbour.is_visited():
                 neighbour.visit_cell()
-                self.edges[edge].setPen(self.white_pen)
+                self.edges[edge].setZValue(-1)
                 self.create_maze(neighbour.x, neighbour.y)
 
             if all(n.is_visited() for n in neighbours.values()):
                 all_visited = True
 
-
-
-
-
-
-        
+        for edge, neighbour in list(neighbours.items()):
+            if self.edges[edge].zValue() == 0:
+                self.cells[x, y].delete_neighbour(edge)
 
 

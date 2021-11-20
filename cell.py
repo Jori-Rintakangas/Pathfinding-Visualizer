@@ -23,8 +23,11 @@ class Cell:
     def get_neighbours(self):
         return self.neighbours
 
-    def add_neighbour(self, neighbour, path):
-        self.neighbours[path] = neighbour
+    def add_neighbour(self, neighbour, edge):
+        self.neighbours[edge] = neighbour
+
+    def delete_neighbour(self, edge):
+        del self.neighbours[edge]
 
     def get_rect(self):
         return self.rect
