@@ -34,6 +34,7 @@ class MyWindow(QMainWindow):
         self.white = QBrush(QtGui.QColor(255,255,255))
         self.white_pen = QPen(QtGui.QColor(255,255,255))
         self.white_pen.setWidth(0)
+        self.path_found = False
         self.init_ui()
 
     def init_ui(self):
@@ -172,12 +173,17 @@ class MyWindow(QMainWindow):
                 self.cells[x, y].delete_neighbour(edge)
 
     def execute_search(self):
+        self.reset_cells()
+        self.path_found = False
         search_method = self.algorithms.currentText()
         if search_method == 'BFS':
             self.execute_BFS()
+        elif search_method == 'DFS':
+            self.cells[0, 0].set_arrived_from(None, None)
+            self.execute_DFS(0, 0)
+            self.draw_path()
 
     def execute_BFS(self):
-        self.reset_cells()
         queue = []
         self.cells[0, 0].visit_cell()
         self.cells[0, 0].set_arrived_from(None, None)
@@ -198,6 +204,23 @@ class MyWindow(QMainWindow):
                     queue.append([neighbour.x, neighbour.y])
 
         self.draw_path()
+
+    def execute_DFS(self, x, y):
+        self.delay()
+        self.cells[x, y].get_rect().setBrush(QBrush(QtGui.QColor(0, 0, 255)))
+        self.cells[x, y].visit_cell()
+        if x == 780 and y == 780:
+            self.path_found = True
+            return
+        neighbours = self.cells[x, y].get_neighbours()
+        for n in list(neighbours.items()):
+            if self.path_found:
+                return
+            neighbour = n[1]
+            if not neighbour.is_visited():
+                self.cells[neighbour.x, neighbour.y].visit_cell()
+                neighbour.set_arrived_from(x, y)
+                self.execute_DFS(neighbour.x, neighbour.y)
 
     def reset_cells(self):
         for cell in list(self.cells.items()):
