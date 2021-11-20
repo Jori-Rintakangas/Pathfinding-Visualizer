@@ -54,6 +54,7 @@ class MyWindow(QMainWindow):
         self.visualize_button = QtWidgets.QPushButton(self)
         self.visualize_button.setGeometry(20, 90, 100, 30)
         self.visualize_button.setText('Visualize')
+        self.visualize_button.clicked.connect(self.execute_search)
 
         self.animation_speed = QtWidgets.QSlider(Qt.Horizontal, self)
         self.animation_speed.setGeometry(20, 160, 100, 20)
@@ -146,7 +147,6 @@ class MyWindow(QMainWindow):
                 self.cells[x, y] = new_cell
 
     def create_maze(self, x, y):
-        self.delay()
         self.cells[x, y].visit_cell()
         self.cells[x, y].get_rect().setBrush(self.white)
         neighbours = self.cells[x, y].get_neighbours()
@@ -171,4 +171,44 @@ class MyWindow(QMainWindow):
             if self.edges[edge].zValue() == 0:
                 self.cells[x, y].delete_neighbour(edge)
 
+    def execute_search(self):
+        search_method = self.algorithms.currentText()
+        if search_method == 'BFS':
+            self.execute_BFS()
 
+    def execute_BFS(self):
+        self.reset_cells()
+        queue = []
+        self.cells[0, 0].visit_cell()
+        self.cells[0, 0].set_arrived_from(None, None)
+        queue.append([0, 0])
+
+        while len(queue) > 0:
+            cell = queue.pop(0)
+            self.delay()
+            self.cells[cell[0], cell[1]].get_rect().setBrush(QBrush(QtGui.QColor(0, 0, 255)))
+            if cell[0] == 780 and cell[1] == 780:
+                break
+            neighbours = self.cells[cell[0], cell[1]].get_neighbours()
+            for n in list(neighbours.items()):
+                neighbour = n[1]
+                if not neighbour.is_visited():
+                    self.cells[neighbour.x, neighbour.y].visit_cell()
+                    neighbour.set_arrived_from(cell[0], cell[1])
+                    queue.append([neighbour.x, neighbour.y])
+
+        self.draw_path()
+
+    def reset_cells(self):
+        for cell in list(self.cells.items()):
+            cell[1].visited = False
+
+    def draw_path(self):
+        cell = [780, 780]
+        while True:
+            self.cells[cell[0], cell[1]].get_rect().setBrush(QBrush(QtGui.QColor(255,0,0)))
+            arrived_from = self.cells[cell[0], cell[1]].arrived_from
+            if arrived_from == [None, None]:
+                break
+            cell = arrived_from
+            self.delay()
