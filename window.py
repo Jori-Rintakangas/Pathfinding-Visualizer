@@ -47,18 +47,37 @@ class MyWindow(QMainWindow):
         self.view.setGeometry(LEFT_MARGIN, TOP_MARGIN, VIEW_W + 20, VIEW_H + 20)
         self.view.setScene(self.scene)
 
+        self.algorithm_label = QtWidgets.QLabel(self)
+        self.algorithm_label.setText('Path Finding:')
+        self.algorithm_label.setStyleSheet("font-weight: bold; color: black")
+        self.algorithm_label.move(20, 30)
+
         self.algorithms = QtWidgets.QComboBox(self)
-        self.algorithms.setGeometry(20, 40, 100, 30)
+        self.algorithms.setGeometry(20, 55, 100, 30)
         algorithms = ['BFS', 'DFS', 'Dijkstra', 'A*']
         self.algorithms.insertItems(0, algorithms)
 
+        self.maze_label = QtWidgets.QLabel(self)
+        self.maze_label.setText('Maze Creation:')
+        self.maze_label.setStyleSheet("font-weight: bold; color: black")
+        self.maze_label.move(20, 85)
+
+        self.maze_algorithms = QtWidgets.QComboBox(self)
+        self.maze_algorithms.setGeometry(20, 110, 100, 30)
+        maze_algorithms = ['Randomized DFS', 'Randomised Prim']
+        self.maze_algorithms.insertItems(0, maze_algorithms)
+
+        self.new_maze_button = QtWidgets.QPushButton(self)
+        self.new_maze_button.setGeometry(20, 170, 100, 30)
+        self.new_maze_button.setText('Create Maze')
+
         self.visualize_button = QtWidgets.QPushButton(self)
-        self.visualize_button.setGeometry(20, 90, 100, 30)
-        self.visualize_button.setText('Visualize')
+        self.visualize_button.setGeometry(20, 210, 100, 30)
+        self.visualize_button.setText('Find Path')
         self.visualize_button.clicked.connect(self.execute_search)
 
         self.animation_speed = QtWidgets.QSlider(Qt.Horizontal, self)
-        self.animation_speed.setGeometry(20, 160, 100, 20)
+        self.animation_speed.setGeometry(20, 280, 100, 20)
         self.animation_speed.setInvertedAppearance(True)
         self.animation_speed.setRange(1, 400)
         self.animation_speed.setValue(40)
@@ -66,11 +85,8 @@ class MyWindow(QMainWindow):
 
         self.text_label = QtWidgets.QLabel(self)
         self.text_label.setText('Animation Speed')
-        self.text_label.move(25, 180)
-
-        self.new_maze_button = QtWidgets.QPushButton(self)
-        self.new_maze_button.setGeometry(20, 250, 100, 30)
-        self.new_maze_button.setText('New Maze')
+        self.text_label.setStyleSheet("font-weight: bold; color: black")
+        self.text_label.move(25, 300)
 
 
     def change_speed(self):
