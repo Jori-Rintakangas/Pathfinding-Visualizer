@@ -31,9 +31,13 @@ class MyWindow(QMainWindow):
         self.edges = {}
         self.cells = {}
         self.speed = 100
-        self.white = QBrush(QtGui.QColor(255,255,255))
-        self.white_pen = QPen(QtGui.QColor(255,255,255))
-        self.white_pen.setWidth(0)
+        self.white = QBrush(QtGui.QColor(255, 255, 255))
+        self.blue = QBrush(QtGui.QColor(0, 0, 255))
+        self.red = QBrush(QtGui.QColor(255, 0, 0))
+        self.white_pen = QPen(QtGui.QColor(255, 255, 255))
+        self.black_pen = QPen(QtGui.QColor(0, 0, 0))
+        self.white_pen.setWidth(-1)
+        self.black_pen.setWidth(2)
         self.path_found = False
         self.init_ui()
 
@@ -88,7 +92,6 @@ class MyWindow(QMainWindow):
         self.text_label.setStyleSheet("font-weight: bold; color: black")
         self.text_label.move(25, 300)
 
-
     def change_speed(self):
         self.speed = self.animation_speed.value()
 
@@ -98,16 +101,14 @@ class MyWindow(QMainWindow):
             QCoreApplication.processEvents(QEventLoop.AllEvents, 100)
     
     def init_grid(self):
-        pen = QPen(QtGui.QColor(0,0,0))
-        pen.setWidth(2)
         edge1_id = 0
         edge2_id = 0
-        for y in range(0 ,VIEW_H, STEP):
-            for x in range(0 ,VIEW_W, STEP):
+        for y in range(0, VIEW_H, STEP):
+            for x in range(0, VIEW_W, STEP):
                 edge1_id += 1
                 edge2_id -= 1
-                edge1 = self.scene.addLine(0, 0, STEP, 0, pen)
-                edge2 = self.scene.addLine(0, 0, 0, STEP, pen)
+                edge1 = self.scene.addLine(0, 0, STEP, 0, self.black_pen)
+                edge2 = self.scene.addLine(0, 0, 0, STEP, self.black_pen)
 
                 edge1.moveBy(x, y)
                 edge2.moveBy(x, y)
@@ -119,19 +120,19 @@ class MyWindow(QMainWindow):
                     continue
 
                 if y == 0:
-                    cell1 = self.cells[x,y]
+                    cell1 = self.cells[x, y]
                     cell2 = self.cells[x - STEP, y]
                     cell1.add_neighbour(cell2, edge2_id)
                     cell2.add_neighbour(cell1, edge2_id)
                 
                 elif x == 0:
-                    cell1 = self.cells[x,y]
+                    cell1 = self.cells[x, y]
                     cell2 = self.cells[x, y - STEP]
                     cell1.add_neighbour(cell2, edge1_id)
                     cell2.add_neighbour(cell1, edge1_id)
                 
                 else:
-                    cell1 = self.cells[x,y]
+                    cell1 = self.cells[x, y]
                     cell2 = self.cells[x - STEP, y]
                     cell3 = self.cells[x, y - STEP]
 
@@ -143,32 +144,29 @@ class MyWindow(QMainWindow):
 
                 if x == VIEW_W - STEP:
                     edge2_id -= 1
-                    edge2 = self.scene.addLine(0, 0, 0, STEP, pen)
+                    edge2 = self.scene.addLine(0, 0, 0, STEP, self.black_pen)
                     edge2.moveBy(x + STEP, y)
                     self.edges[edge2_id] = edge2
                 if y == VIEW_H - STEP:
                     edge1_id += 1
-                    edge1 = self.scene.addLine(0, 0, STEP, 0, pen)
+                    edge1 = self.scene.addLine(0, 0, STEP, 0, self.black_pen)
                     edge1.moveBy(x, y + STEP)
                     self.edges[edge1_id] = edge1
 
     def create_cells(self):
-        brush = QBrush(QtGui.QColor(0,0,255))
-        pen = QPen(QtGui.QColor(0,0,0))
-        pen.setWidth(-1)
-        for y in range(0 ,VIEW_H, STEP):
-            for x in range(0 ,VIEW_W, STEP):
-                rect = self.scene.addRect(0,0, CELL_SIZE, CELL_SIZE, pen, brush)
-                rect.moveBy(x,y)
+        for y in range(0, VIEW_H, STEP):
+            for x in range(0, VIEW_W, STEP):
+                rect = self.scene.addRect(0, 0, CELL_SIZE, CELL_SIZE,
+                                          self.white_pen, self.blue)
+                rect.moveBy(x, y)
                 new_cell = c.Cell(x, y, rect)
                 self.cells[x, y] = new_cell
 
-    def create_maze(self, x, y):
+    def create_maze_DFS(self, x, y):
         self.delay()
         self.cells[x, y].visit_cell()
         self.cells[x, y].get_rect().setBrush(self.white)
         neighbours = self.cells[x, y].get_neighbours()
-
         all_visited = False
         while not all_visited:
             neighbours = self.cells[x, y].get_neighbours()
@@ -180,7 +178,7 @@ class MyWindow(QMainWindow):
             if not neighbour.is_visited():
                 neighbour.visit_cell()
                 self.edges[edge].setZValue(-1)
-                self.create_maze(neighbour.x, neighbour.y)
+                self.create_maze_DFS(neighbour.x, neighbour.y)
 
             if all(n.is_visited() for n in neighbours.values()):
                 all_visited = True
@@ -223,7 +221,7 @@ class MyWindow(QMainWindow):
         elif search_method == 'DFS':
             self.cells[0, 0].set_arrived_from(None, None)
             self.execute_DFS(0, 0)
-            self.draw_path()
+        self.draw_path()
 
     def execute_BFS(self):
         queue = []
@@ -232,9 +230,9 @@ class MyWindow(QMainWindow):
         queue.append([0, 0])
 
         while len(queue) > 0:
-            cell = queue.pop(0)
             self.delay()
-            self.cells[cell[0], cell[1]].get_rect().setBrush(QBrush(QtGui.QColor(0, 0, 255)))
+            cell = queue.pop(0)
+            self.cells[cell[0], cell[1]].get_rect().setBrush(self.blue)
             if cell[0] == 780 and cell[1] == 780:
                 break
             neighbours = self.cells[cell[0], cell[1]].get_neighbours()
@@ -245,11 +243,9 @@ class MyWindow(QMainWindow):
                     neighbour.set_arrived_from(cell[0], cell[1])
                     queue.append([neighbour.x, neighbour.y])
 
-        self.draw_path()
-
     def execute_DFS(self, x, y):
         self.delay()
-        self.cells[x, y].get_rect().setBrush(QBrush(QtGui.QColor(0, 0, 255)))
+        self.cells[x, y].get_rect().setBrush(self.blue)
         self.cells[x, y].visit_cell()
         if x == 780 and y == 780:
             self.path_found = True
@@ -271,7 +267,7 @@ class MyWindow(QMainWindow):
     def draw_path(self):
         cell = [780, 780]
         while True:
-            self.cells[cell[0], cell[1]].get_rect().setBrush(QBrush(QtGui.QColor(255,0,0)))
+            self.cells[cell[0], cell[1]].get_rect().setBrush(self.red)
             arrived_from = self.cells[cell[0], cell[1]].arrived_from
             if arrived_from == [None, None]:
                 break
