@@ -212,6 +212,12 @@ class MyWindow(QMainWindow):
                 edge = random_neighbour[0]
                 self.edges[edge].setZValue(-1)
 
+        for coord, cell in list(self.cells.items()):
+            neighbours = cell.get_neighbours()
+            for edge, neighbour in list(neighbours.items()):
+                if self.edges[edge].zValue() == 0:
+                    cell.delete_neighbour(edge)
+
     def execute_search(self):
         self.reset_cells()
         self.path_found = False
