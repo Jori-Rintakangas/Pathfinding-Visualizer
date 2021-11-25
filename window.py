@@ -58,7 +58,7 @@ class MyWindow(QMainWindow):
 
         self.algorithms = QtWidgets.QComboBox(self)
         self.algorithms.setGeometry(20, 55, 100, 30)
-        algorithms = ['BFS', 'DFS', 'Dijkstra', 'A*']
+        algorithms = ['BFS', 'DFS']
         self.algorithms.insertItems(0, algorithms)
 
         self.maze_label = QtWidgets.QLabel(self)
@@ -68,17 +68,19 @@ class MyWindow(QMainWindow):
 
         self.maze_algorithms = QtWidgets.QComboBox(self)
         self.maze_algorithms.setGeometry(20, 110, 100, 30)
-        maze_algorithms = ['Randomized DFS', 'Randomised Prim']
+        maze_algorithms = ['Randomized DFS', 'Randomized Prim']
         self.maze_algorithms.insertItems(0, maze_algorithms)
 
         self.new_maze_button = QtWidgets.QPushButton(self)
         self.new_maze_button.setGeometry(20, 170, 100, 30)
         self.new_maze_button.setText('Create Maze')
+        self.new_maze_button.clicked.connect(self.create_maze)
 
         self.visualize_button = QtWidgets.QPushButton(self)
         self.visualize_button.setGeometry(20, 210, 100, 30)
         self.visualize_button.setText('Find Path')
         self.visualize_button.clicked.connect(self.execute_search)
+        self.visualize_button.setEnabled(False)
 
         self.animation_speed = QtWidgets.QSlider(Qt.Horizontal, self)
         self.animation_speed.setGeometry(20, 280, 100, 20)
@@ -162,6 +164,21 @@ class MyWindow(QMainWindow):
                 new_cell = c.Cell(x, y, rect)
                 self.cells[x, y] = new_cell
 
+    def create_maze(self):
+        self.visualize_button.setEnabled(False)
+        self.new_maze_button.setEnabled(False)
+        self.cells.clear()
+        self.edges.clear()
+        self.create_cells()
+        self.init_grid()
+        creation_method = self.maze_algorithms.currentText()
+        if creation_method == 'Randomized DFS':
+            self.create_maze_DFS(0, 0)
+        elif creation_method == 'Randomized Prim':
+            self.create_maze_prim(0, 0)
+        self.visualize_button.setEnabled(True)
+        self.new_maze_button.setEnabled(True)
+
     def create_maze_DFS(self, x, y):
         self.delay()
         self.cells[x, y].visit_cell()
@@ -221,6 +238,7 @@ class MyWindow(QMainWindow):
     def execute_search(self):
         self.reset_cells()
         self.path_found = False
+        self.new_maze_button.setEnabled(False)
         search_method = self.algorithms.currentText()
         if search_method == 'BFS':
             self.execute_BFS()
@@ -228,6 +246,7 @@ class MyWindow(QMainWindow):
             self.cells[0, 0].set_arrived_from(None, None)
             self.execute_DFS(0, 0)
         self.draw_path()
+        self.new_maze_button.setEnabled(True)
 
     def execute_BFS(self):
         queue = []
@@ -268,6 +287,7 @@ class MyWindow(QMainWindow):
 
     def reset_cells(self):
         for cell in list(self.cells.items()):
+            cell[1].get_rect().setBrush(self.white)
             cell[1].visited = False
 
     def draw_path(self):
@@ -279,3 +299,7 @@ class MyWindow(QMainWindow):
                 break
             cell = arrived_from
             self.delay()
+
+    def res_cells(self):
+        for cell in list(self.cells.items()):
+            cell[1].get_rect().setBrush(self.white)

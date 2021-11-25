@@ -9,7 +9,6 @@ def create_window():
     win.show()
     win.create_cells()
     win.init_grid()
-    win.create_maze_prim(0, 0)
     sys.exit(app.exec_())
 
 create_window()
