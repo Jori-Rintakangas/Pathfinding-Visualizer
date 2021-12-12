@@ -1,8 +1,6 @@
-from PyQt5 import QtWidgets
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtGui import QPen, QBrush
-from PyQt5.QtWidgets import QMainWindow, QGraphicsRectItem
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt5.QtWidgets import QMainWindow, QGraphicsView, QGraphicsScene
 from PyQt5.QtCore import Qt, QEventLoop, QTimer
 import cell as c
 import random
@@ -51,7 +49,7 @@ class MyWindow(QMainWindow):
         self.scene = QGraphicsScene(self)
         self.view = QGraphicsView(self)
 
-        self.scene.setSceneRect(0,0, VIEW_W, VIEW_H)
+        self.scene.setSceneRect(0, 0, VIEW_W, VIEW_H)
         self.view.setGeometry(LEFT_MARGIN, TOP_MARGIN, VIEW_W + 20, VIEW_H + 20)
         self.view.setScene(self.scene)
 
@@ -305,7 +303,3 @@ class MyWindow(QMainWindow):
                 break
             cell = arrived_from
             self.delay()
-
-    def res_cells(self):
-        for cell in list(self.cells.items()):
-            cell[1].get_rect().setBrush(self.white)

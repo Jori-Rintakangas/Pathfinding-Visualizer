@@ -1,9 +1,3 @@
-from PyQt5.QtWidgets import QGraphicsRectItem
-
-NORTH = 0
-SOUTH = 1
-EAST = 2
-WEST = 3
 
 class Cell:
     def __init__(self, x, y, rect):
@@ -12,7 +6,7 @@ class Cell:
         self.rect = rect
         self.neighbours = {}
         self.visited = False
-        self.arrived_from = [0,0]
+        self.arrived_from = [0, 0]
 
     def is_visited(self):
         return self.visited
@@ -31,9 +25,6 @@ class Cell:
 
     def get_rect(self):
         return self.rect
-
-    def get_location(self):
-        return [self.x, self.y]
 
     def set_arrived_from(self, x, y):
         self.arrived_from = [x, y]
