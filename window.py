@@ -184,17 +184,17 @@ class MyWindow(QMainWindow):
 
     def create_maze_DFS(self, x, y):
         self.delay()
-        self.cells[x, y].visit_cell()
-        self.cells[x, y].get_rect().setBrush(self.white)
-        neighbours = self.cells[x, y].get_neighbours()
+        cell = self.cells[x, y]
+        cell.visit_cell()
+        cell.get_rect().setBrush(self.white)
         all_visited = False
         while not all_visited:
-            neighbours = self.cells[x, y].get_neighbours()
+            neighbours = cell.get_neighbours()
             if not neighbours:
                 break
-            cell = random.choice(list(neighbours.items()))
-            edge = cell[0]
-            neighbour = cell[1]
+            rand_neigh = random.choice(list(neighbours.items()))
+            edge = rand_neigh[0]
+            neighbour = rand_neigh[1]
             if not neighbour.is_visited():
                 neighbour.visit_cell()
                 self.edges[edge].setZValue(-1)
@@ -205,7 +205,7 @@ class MyWindow(QMainWindow):
 
         for edge, neighbour in list(neighbours.items()):
             if self.edges[edge].zValue() == 0:
-                self.cells[x, y].delete_neighbour(edge)
+                cell.delete_neighbour(edge)
 
     def create_maze_prim(self, x, y):
         self.cells[x, y].visit_cell()
@@ -214,13 +214,15 @@ class MyWindow(QMainWindow):
         frontier_cells.add((x, y))
         while len(frontier_cells) > 0:
             self.delay()
-            cell = random.choice(list(frontier_cells))
-            self.cells[cell[0], cell[1]].get_rect().setBrush(self.white)
-            frontier_cells.remove((cell[0], cell[1]))
 
-            self.cells[cell[0], cell[1]].visit_cell()
-            neighbours = self.cells[cell[0], cell[1]].get_neighbours()
+            random_cell = random.choice(list(frontier_cells))
+            cell = self.cells[random_cell[0], random_cell[1]]
+            cell.get_rect().setBrush(self.white)
+            cell.visit_cell()
 
+            frontier_cells.remove((cell.x, cell.y))
+
+            neighbours = cell.get_neighbours()
             for neighbour in neighbours.items():
                 if not neighbour[1].is_visited():
                     frontier_cells.add((neighbour[1].x, neighbour[1].y))
@@ -245,7 +247,7 @@ class MyWindow(QMainWindow):
         self.visualize_button.setEnabled(False)
         search_method = self.algorithms.currentText()
         if search_method == 'BFS':
-            self.execute_BFS()
+            self.execute_BFS(0, 0)
         elif search_method == 'DFS':
             self.cells[0, 0].set_arrived_from(None, None)
             self.execute_DFS(0, 0)
@@ -254,34 +256,36 @@ class MyWindow(QMainWindow):
         self.visualize_button.setEnabled(True)
         self.animation_speed.setValue(20)
 
-    def execute_BFS(self):
+    def execute_BFS(self, x, y):
         queue = []
-        self.cells[0, 0].visit_cell()
-        self.cells[0, 0].set_arrived_from(None, None)
-        queue.append([0, 0])
+        self.cells[x, y].visit_cell()
+        self.cells[x, y].set_arrived_from(None, None)
+        queue.append([x, y])
 
         while len(queue) > 0:
             self.delay()
-            cell = queue.pop(0)
-            self.cells[cell[0], cell[1]].get_rect().setBrush(self.blue)
-            if cell[0] == 780 and cell[1] == 780:
+            coords = queue.pop(0)
+            cell = self.cells[coords[0], coords[1]]
+            cell.get_rect().setBrush(self.blue)
+            if coords[0] == 780 and coords[1] == 780:
                 break
-            neighbours = self.cells[cell[0], cell[1]].get_neighbours()
+            neighbours = cell.get_neighbours()
             for n in list(neighbours.items()):
                 neighbour = n[1]
                 if not neighbour.is_visited():
                     self.cells[neighbour.x, neighbour.y].visit_cell()
-                    neighbour.set_arrived_from(cell[0], cell[1])
+                    neighbour.set_arrived_from(coords[0], coords[1])
                     queue.append([neighbour.x, neighbour.y])
 
     def execute_DFS(self, x, y):
         self.delay()
-        self.cells[x, y].get_rect().setBrush(self.blue)
-        self.cells[x, y].visit_cell()
+        cell = self.cells[x, y]
+        cell.get_rect().setBrush(self.blue)
+        cell.visit_cell()
         if x == 780 and y == 780:
             self.path_found = True
             return
-        neighbours = self.cells[x, y].get_neighbours()
+        neighbours = cell.get_neighbours()
         for n in list(neighbours.items()):
             if self.path_found:
                 return
@@ -300,8 +304,9 @@ class MyWindow(QMainWindow):
         self.animation_speed.setValue(20)
         cell = [780, 780]
         while True:
-            self.cells[cell[0], cell[1]].get_rect().setBrush(self.red)
-            arrived_from = self.cells[cell[0], cell[1]].arrived_from
+            cell = self.cells[cell[0], cell[1]]
+            cell.get_rect().setBrush(self.red)
+            arrived_from = cell.arrived_from
             if arrived_from == [None, None]:
                 break
             cell = arrived_from
