@@ -87,8 +87,8 @@ class MyWindow(QMainWindow):
         self.animation_speed = QtWidgets.QSlider(Qt.Horizontal, self)
         self.animation_speed.setGeometry(20, 280, 100, 20)
         self.animation_speed.setInvertedAppearance(True)
-        self.animation_speed.setRange(1, 400)
-        self.animation_speed.setValue(40)
+        self.animation_speed.setRange(1, 60)
+        self.animation_speed.setValue(20)
         self.animation_speed.valueChanged.connect(self.change_speed)
 
         self.text_label = QtWidgets.QLabel(self)
@@ -180,6 +180,7 @@ class MyWindow(QMainWindow):
             self.create_maze_prim(0, 0)
         self.visualize_button.setEnabled(True)
         self.new_maze_button.setEnabled(True)
+        self.animation_speed.setValue(20)
 
     def create_maze_DFS(self, x, y):
         self.delay()
@@ -251,6 +252,7 @@ class MyWindow(QMainWindow):
         self.draw_path()
         self.new_maze_button.setEnabled(True)
         self.visualize_button.setEnabled(True)
+        self.animation_speed.setValue(20)
 
     def execute_BFS(self):
         queue = []
@@ -295,6 +297,7 @@ class MyWindow(QMainWindow):
             cell[1].visited = False
 
     def draw_path(self):
+        self.animation_speed.setValue(20)
         cell = [780, 780]
         while True:
             self.cells[cell[0], cell[1]].get_rect().setBrush(self.red)
