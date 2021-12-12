@@ -1,13 +1,12 @@
 from PyQt5 import QtWidgets
-import PyQt5
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPen, QBrush
-from PyQt5.QtWidgets import QGraphicsLineItem, QMainWindow, QGraphicsRectItem
+from PyQt5.QtWidgets import QMainWindow, QGraphicsRectItem
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import Qt, QTime, QEventLoop, QCoreApplication
-from collections import deque
+from PyQt5.QtCore import Qt, QEventLoop, QTimer
 import cell as c
 import random
+import sys
 
 X_POS = 50
 Y_POS = 300
@@ -39,7 +38,12 @@ class MyWindow(QMainWindow):
         self.white_pen.setWidth(-1)
         self.black_pen.setWidth(2)
         self.path_found = False
+        self.delay_loop = QEventLoop()
         self.init_ui()
+
+    def closeEvent(self, event):
+        event.accept()
+        sys.exit(self.delay_loop.exit())
 
     def init_ui(self):
         self.setGeometry(X_POS, Y_POS, WIDTH, HEIGHT)
@@ -98,9 +102,9 @@ class MyWindow(QMainWindow):
         self.speed = self.animation_speed.value()
 
     def delay(self):
-        die_time = QTime.currentTime().addMSecs(self.speed)
-        while QTime.currentTime() < die_time:
-            QCoreApplication.processEvents(QEventLoop.AllEvents, 100)
+        self.delay_loop = QEventLoop()
+        QTimer.singleShot(self.speed, self.delay_loop.quit)
+        self.delay_loop.exec_()
     
     def init_grid(self):
         edge1_id = 0
@@ -239,6 +243,7 @@ class MyWindow(QMainWindow):
         self.reset_cells()
         self.path_found = False
         self.new_maze_button.setEnabled(False)
+        self.visualize_button.setEnabled(False)
         search_method = self.algorithms.currentText()
         if search_method == 'BFS':
             self.execute_BFS()
@@ -247,6 +252,7 @@ class MyWindow(QMainWindow):
             self.execute_DFS(0, 0)
         self.draw_path()
         self.new_maze_button.setEnabled(True)
+        self.visualize_button.setEnabled(True)
 
     def execute_BFS(self):
         queue = []
