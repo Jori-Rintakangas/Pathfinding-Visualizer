@@ -1,15 +1,9 @@
-# Pathfinding Visualizer
-
-## About
-A program that visualizes how different maze creation and 
-pathfinding algorithms work.
+# Pathfinding-Visualizer
+Visualizer for pathfinding and maze creation algorithms.
 
 ## Illustration
-User interface of the program. \
-The area in blue shows the area that the pathfinding 
-algorithm covered before it found the path.
 
-![image](UI.PNG)
+![gif](pathfind.gif)
 
 ## Technologies
 
